@@ -1,0 +1,91 @@
+---
+title       : Baltimore Murders by neighborhoods
+subtitle    : Developing Data Products week 4
+author      : Adrian Martin
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Reproducible Project Pitch
+
+* My Shiny App shows the distribution of homicides in Baltimore neighborhoods, from 2011 to 2015.
+* I pulled the data from the Baltimore City website, which you can access at data.baltimorecity.gov.
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(RSocrata)
+library(lubridate)
+library(leaflet)
+
+murders <- read.socrata("https://data.baltimorecity.gov/Public-Safety/HOMICIDES/gzf8-pc84")
+
+```
+
+--- .class #id 
+
+## Pulling the data
+
+* Baltimore uses the company Socrata to manage their data portal.
+* You simply find a data view on the city website that you like, and use the RSocrata package to pull the data from that view
+```{r eval=FALSE}
+install.packages("RSocrata")
+library(RSocrata)
+murders <- read.socrata("https://data.baltimorecity.gov/Public-Safety/HOMICIDES/gzf8-pc84")
+```
+
+---
+
+## Looking at the data
+
+* The data has the date and time of the crime, the "CrimeCode" (the number refers to the type of crime), the address of the time (aggregated to the block), the description of the crime, whether it occured inside or outside, the weapon used in the crime, the Baltimore Police patrolling district and sub-district (post), the neighborhood in which the crime occured, the GPS location, and the total number of incidents referred to by this line of data (which was 1 for all lines in this dataset).
+
+* Here's the first line of the data (later, I extract the GPS coordinates to put lat and lon in their own columns).
+
+```{r}
+murders[1,]
+```
+
+```{r echo = FALSE}
+murders <- murders[which(murders$CrimeDate < "2016-01-01"),]
+murders$Location <- as.character(murders$Location)
+murders$Location.1 <- as.character(murders$Location.1)
+murders$Neighborhood <- as.character(murders$Neighborhood)
+extractGPS <- function(location.1) {
+    lat <- as.numeric()
+    lng <- as.numeric()
+    for(i in 1:length(location.1)){
+        lat[i] <- substr(x = location.1[i], 
+                         start = 2, 
+                         stop = regexpr(text = location.1[i], pattern = ",") - 1)
+        lng[i] <- substr(x = location.1[i],
+                         start = regexpr(text = location.1[i], pattern = "-") - 1,
+                         stop = nchar(location.1[i]) - 1)
+        }
+    return(data.frame(lat = as.numeric(lat), lng = as.numeric(lng)))
+    }
+murders$coords <- extractGPS(murders$Location.1)
+murders$year <- as.factor(lubridate::year(murders$CrimeDate))
+
+```
+
+---
+
+## Exploring the data
+
+* Most Baltimore neighborhoods have experienced one or fewer homicides per year in the past five years.
+* The distribution of homicides is very unequal - it is a long-tail distribution.
+```{r echo = FALSE}
+hist(table(murders$Neighborhood), breaks = 1:40, main = "Distribution of murders by neighborhood")
+```
+
+---
+
+## Showing the data with a Shiny App
+
+* For my Shiny App, I ask the user to select one of the one hundred and ninety nine neighborhoods in Baltimore that has experienced a homicide in the past five years. Note that there are almost a hundred Baltimore neighborhoods that do not appear in the data as they did not experience any homicides in this time period.
+* That value is passed to "input$nhood", and is used to subset the data used for the table calculation and displayed in the leaflet map.
+* Have fun poking around!

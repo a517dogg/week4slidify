@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Baltimore Murders by neighborhoods</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Baltimore Murders by neighborhoods">
+  <meta name="author" content="Adrian Martin">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Baltimore Murders by neighborhoods</h1>
+    <h2>Developing Data Products week 4</h2>
+    <p>Adrian Martin<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Reproducible Project Pitch</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>My Shiny App shows the distribution of homicides in Baltimore neighborhoods, from 2011 to 2015.</li>
+<li>I pulled the data from the Baltimore City website, which you can access at data.baltimorecity.gov.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>Pulling the data</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Baltimore uses the company Socrata to manage their data portal.</li>
+<li>You simply find a data view on the city website that you like, and use the RSocrata package to pull the data from that view</li>
+</ul>
+
+<pre><code class="r">install.packages(&quot;RSocrata&quot;)
+library(RSocrata)
+murders &lt;- read.socrata(&quot;https://data.baltimorecity.gov/Public-Safety/HOMICIDES/gzf8-pc84&quot;)
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Looking at the data</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><p>The data has the date and time of the crime, the &quot;CrimeCode&quot; (the number refers to the type of crime), the address of the time (aggregated to the block), the description of the crime, whether it occured inside or outside, the weapon used in the crime, the Baltimore Police patrolling district and sub-district (post), the neighborhood in which the crime occured, the GPS location, and the total number of incidents referred to by this line of data (which was 1 for all lines in this dataset).</p></li>
+<li><p>Here&#39;s the first line of the data (later, I extract the GPS coordinates to put lat and lon in their own columns).</p></li>
+</ul>
+
+<pre><code class="r">murders[1,]
+</code></pre>
+
+<pre><code>##    CrimeDate CrimeTime CrimeCode      Location Description Inside.Outside
+## 1 2011-01-01       136        1K 1500 HAZEL ST    HOMICIDE        Outside
+##   Weapon Post District Neighborhood          Location.1 Total.Incidents
+## 1  KNIFE  911 SOUTHERN   Curtis Bay (39.226, -76.58984)               1
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Exploring the data</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Most Baltimore neighborhoods have experienced one or fewer homicides per year in the past five years.</li>
+<li>The distribution of homicides is very unequal - it is a long-tail distribution.
+<img src="figure/unnamed-chunk-5-1.png" alt="plot of chunk unnamed-chunk-5"></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-5" style="background:;">
+  <hgroup>
+    <h2>Showing the data with a Shiny App</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>For my Shiny App, I ask the user to select one of the one hundred and ninety nine neighborhoods in Baltimore that has experienced a homicide in the past five years. Note that there are almost a hundred Baltimore neighborhoods that do not appear in the data as they did not experience any homicides in this time period.</li>
+<li>That value is passed to &quot;input$nhood&quot;, and is used to subset the data used for the table calculation and displayed in the leaflet map.</li>
+<li>Have fun poking around!</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Reproducible Project Pitch'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Pulling the data'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Looking at the data'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Exploring the data'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title='Showing the data with a Shiny App'>
+         5
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
